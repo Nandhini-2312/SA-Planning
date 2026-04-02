@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldProxy — FSM Sprint Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F8FA;
+    --white: #FFFFFF;
+    --border: #E4E7EC;
+    --border-light: #F0F2F5;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --blue-mid: #DBEAFE;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --purple: #7C3AED;
+    --purple-light: #F5F3FF;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --cyan: #0891B2;
+    --cyan-light: #ECFEFF;
+    --slate-900: #0F172A;
+    --slate-700: #334155;
+    --slate-500: #64748B;
+    --slate-400: #94A3B8;
+    --slate-300: #CBD5E1;
+    --slate-100: #F1F5F9;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Plus Jakarta Sans', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--slate-900); font-family: var(--sans); font-size: 14px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+
+  /* TOP BAR */
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; gap: 24px; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--slate-900); letter-spacing: -0.01em; text-decoration: none; }
+  .topbar-logo-icon { width: 28px; height: 28px; background: var(--blue); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .topbar-divider { width: 1px; height: 20px; background: var(--border); }
+  .topbar-label { font-size: 13px; color: var(--slate-500); font-weight: 500; }
+  .topbar-nav { margin-left: auto; display: flex; gap: 4px; }
+  .topbar-nav a { font-size: 12px; font-weight: 500; color: var(--slate-500); text-decoration: none; padding: 5px 12px; border-radius: 6px; transition: all 0.15s; }
+  .topbar-nav a:hover { background: var(--slate-100); color: var(--slate-900); }
+
+  /* LAYOUT */
+  .page { max-width: 1000px; margin: 0 auto; padding: 40px 40px 80px; }
+
+  /* HERO */
+  .hero { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 40px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: start; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--blue); border-radius: 50%; }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; color: var(--slate-900); margin-bottom: 12px; }
+  .hero-sub { font-size: 13.5px; color: var(--slate-500); line-height: 1.7; max-width: 480px; }
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 200px; }
+  .stat-box { background: var(--slate-100); border-radius: 10px; padding: 14px 16px; text-align: center; }
+  .stat-val { font-size: 20px; font-weight: 800; color: var(--slate-900); letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px; }
+  .stat-lbl { font-size: 10px; font-weight: 700; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* SPRINT STRIP */
+  .sprint-strip { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; }
+  .sprint-day { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; border-radius: 8px; position: relative; transition: background 0.15s; }
+  .sprint-day:hover { background: var(--slate-100); }
+  .sprint-day + .sprint-day::before { content: ''; position: absolute; left: 0; top: 20%; height: 60%; width: 1px; background: var(--border); }
+  .sd-num { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate-400); margin-bottom: 5px; }
+  .sd-dot { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; margin-bottom: 5px; }
+  .sd-label { font-size: 10px; font-weight: 600; color: var(--slate-500); text-align: center; line-height: 1.3; }
+  .sd-sub { font-size: 9px; color: var(--slate-400); margin-top: 2px; text-align: center; }
+
+  /* PROGRESS */
+  .progress-bar-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .progress-label { font-size: 12px; font-weight: 600; color: var(--slate-500); white-space: nowrap; }
+  .progress-count { font-size: 14px; font-weight: 800; color: var(--slate-900); white-space: nowrap; letter-spacing: -0.02em; }
+  .progress-track { flex: 1; height: 5px; background: var(--slate-100); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--green)); border-radius: 3px; width: 0%; transition: width 0.4s ease; }
+
+  /* SECTION */
+  .section { margin-bottom: 28px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .section-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .section-meta { flex: 1; }
+  .section-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate-400); margin-bottom: 1px; }
+  .section-title { font-size: 17px; font-weight: 700; color: var(--slate-900); letter-spacing: -0.02em; }
+  .section-desc { font-size: 13px; color: var(--slate-500); line-height: 1.6; }
+
+  /* SCHEMA */
+  .schema-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .schema-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .schema-head { padding: 12px 16px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
+  .schema-emoji { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .schema-name { font-size: 12.5px; font-weight: 700; color: var(--slate-900); font-family: var(--mono); }
+  .schema-desc { font-size: 11px; color: var(--slate-400); }
+  .schema-fields { padding: 6px 0; }
+  .field-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 16px; font-size: 12px; border-bottom: 1px solid var(--border-light); }
+  .field-row:last-child { border-bottom: none; }
+  .field-name { font-family: var(--mono); color: var(--slate-700); font-size: 11px; }
+  .field-type { font-family: var(--mono); color: var(--slate-400); font-size: 11px; }
+  .field-right { display: flex; align-items: center; gap: 6px; }
+  .pill { font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 3px; letter-spacing: 0.04em; }
+  .pill-pk { background: #FEF9C3; color: #854D0E; }
+  .pill-fk { background: var(--blue-mid); color: #1D4ED8; }
+
+  /* DAY CARD */
+  .day-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .day-head { padding: 14px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border-light); }
+  .day-num { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .day-info { flex: 1; }
+  .day-name { font-size: 14px; font-weight: 700; color: var(--slate-900); letter-spacing: -0.01em; }
+  .day-focus { font-size: 11.5px; color: var(--slate-500); margin-top: 1px; }
+  .day-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .tag-blue { background: var(--blue-light); color: var(--blue); }
+  .tag-amber { background: var(--amber-light); color: var(--amber); }
+  .tag-green { background: var(--green-light); color: var(--green); }
+  .tag-purple { background: var(--purple-light); color: var(--purple); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+  .tag-cyan { background: var(--cyan-light); color: var(--cyan); }
+  .tag-slate { background: var(--slate-100); color: var(--slate-500); }
+  .day-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* READ BLOCK */
+  .read-block { background: var(--blue-light); border: 1px solid var(--blue-mid); border-radius: 8px; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .read-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 2px; }
+  .read-item { font-size: 12.5px; color: var(--slate-700); display: flex; gap: 8px; line-height: 1.5; }
+  .read-item::before { content: '📖'; font-size: 12px; flex-shrink: 0; }
+
+  /* BLOCK LABEL */
+  .blk-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate-400); margin-bottom: 8px; }
+
+  /* TASK LIST */
+  .task-list { display: flex; flex-direction: column; gap: 5px; }
+  .task { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; background: var(--slate-100); border: 1px solid transparent; border-radius: 7px; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .task:hover { border-color: var(--slate-300); background: var(--white); }
+  .task.done { opacity: 0.5; }
+  .task.done .task-text { text-decoration: line-through; }
+  .task-cb { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--slate-300); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; transition: all 0.15s; margin-top: 2px; background: var(--white); }
+  .task.done .task-cb { background: var(--green); border-color: var(--green); color: white; }
+  .task-text { font-size: 13px; color: var(--slate-700); line-height: 1.5; flex: 1; }
+  .task-text strong { color: var(--slate-900); font-weight: 600; }
+  .task-text code { font-family: var(--mono); font-size: 11px; background: var(--white); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--blue); }
+  .task-note { font-size: 11.5px; color: var(--slate-400); margin-top: 3px; line-height: 1.5; }
+
+  /* DELIVERABLE */
+  .deliverable { background: var(--green-light); border: 1px solid #A7F3D0; border-radius: 8px; padding: 13px 16px; }
+  .del-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+  .del-label::before { content: '✓'; font-size: 11px; }
+  .del-items { display: flex; flex-direction: column; gap: 4px; }
+  .del-item { font-size: 12.5px; color: var(--slate-700); display: flex; gap: 8px; line-height: 1.5; }
+  .del-item::before { content: '→'; color: var(--green); font-weight: 700; flex-shrink: 0; font-size: 11px; margin-top: 2px; }
+
+  /* GATE */
+  .gate { display: flex; gap: 12px; align-items: flex-start; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 16px; }
+  .gate-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .gate-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber); margin-bottom: 3px; }
+  .gate-text { font-size: 12.5px; color: var(--slate-700); line-height: 1.55; }
+  .gate-text strong { font-weight: 600; color: var(--slate-900); }
+
+  /* WARNING */
+  .warning { background: var(--red-light); border: 1px solid #FECACA; border-radius: 8px; padding: 11px 15px; font-size: 12.5px; color: var(--slate-700); line-height: 1.6; }
+  .warning strong { color: var(--red); font-weight: 600; }
+
+  /* N8N BLOCK */
+  .n8n-block { background: var(--purple-light); border: 1px solid #DDD6FE; border-radius: 8px; padding: 16px 18px; }
+  .n8n-title { font-size: 13px; font-weight: 700; color: var(--purple); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+  .n8n-title::before { content: '⚡'; }
+  .n8n-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; padding: 10px 14px; background: white; border-radius: 6px; border: 1px solid #DDD6FE; }
+  .n8n-node { background: var(--purple-light); border: 1px solid #C4B5FD; border-radius: 5px; padding: 5px 11px; font-size: 12px; font-weight: 600; color: var(--purple); }
+  .n8n-arrow { color: var(--slate-400); font-size: 13px; }
+  .n8n-steps { display: flex; flex-direction: column; gap: 7px; }
+  .n8n-step { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: var(--slate-700); line-height: 1.55; }
+  .n8n-num { font-family: var(--mono); font-size: 9px; font-weight: 700; background: var(--purple); color: white; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
+  .n8n-step strong { color: var(--slate-900); font-weight: 600; }
+  .n8n-step code { font-family: var(--mono); font-size: 11px; background: white; border: 1px solid #DDD6FE; padding: 1px 5px; border-radius: 3px; color: var(--purple); }
+
+  /* HARD GATE */
+  .hard-gate { background: var(--slate-900); border-radius: 8px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; }
+  .hard-gate-icon { font-size: 15px; flex-shrink: 0; }
+  .hard-gate-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94A3B8; margin-bottom: 4px; }
+  .hard-gate-text { font-size: 13px; color: var(--white); font-weight: 500; line-height: 1.55; }
+  .hard-gate-text strong { color: #FCD34D; font-weight: 700; }
+
+  /* DEMO CHECKLIST */
+  .demo-list { display: flex; flex-direction: column; gap: 7px; }
+  .demo-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .demo-item:hover { border-color: var(--blue); background: var(--blue-light); }
+  .demo-item.done { opacity: 0.5; }
+  .demo-item.done .demo-text { text-decoration: line-through; }
+  .demo-cb { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--slate-300); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; transition: all 0.15s; margin-top: 1px; background: var(--white); }
+  .demo-item.done .demo-cb { background: var(--green); border-color: var(--green); color: white; }
+  .demo-text { font-size: 13px; color: var(--slate-700); line-height: 1.5; flex: 1; }
+  .demo-text strong { color: var(--slate-900); font-weight: 600; }
+  .demo-note { font-size: 11.5px; color: var(--slate-400); margin-top: 3px; }
+  .demo-text code { font-family: var(--mono); font-size: 11px; background: var(--slate-100); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; }
+
+  /* FOOTER */
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--slate-400); }
+
+  @media (max-width: 680px) {
+    .hero { grid-template-columns: 1fr; }
+    .topbar-nav { display: none; }
+    .page { padding: 20px; }
+    .schema-grid { grid-template-columns: 1fr; }
+    .sprint-strip { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="#">
+    <div class="topbar-logo-icon">🔧</div>
+    FieldProxy
+  </a>
+  <div class="topbar-divider"></div>
+  <div class="topbar-label">FSM Onboarding Sprint — 6 Days</div>
+  <nav class="topbar-nav">
+    <a href="#schema">Schema</a>
+    <a href="#d3">D3</a>
+    <a href="#d4">D4</a>
+    <a href="#d5">D5</a>
+    <a href="#d6">D6</a>
+    <a href="#d7">D7</a>
+    <a href="#d8">D8</a>
+    <a href="#demo">Demo</a>
+  </nav>
+</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">Onboarding Sprint · New Joiner Track</div>
+      <h1>Field Service Management<br>App — Build Plan</h1>
+      <p class="hero-sub">A structured 6-day sprint to build a production-quality FSM application on FieldProxy — covering Customers, Jobs, Technician Assignment, and Status Updates across Web &amp; Mobile, with an n8n automation layer. Demo on Friday.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-box"><div class="stat-val">6</div><div class="stat-lbl">Days</div></div>
+      <div class="stat-box"><div class="stat-val">FSM</div><div class="stat-lbl">Usecase</div></div>
+      <div class="stat-box"><div class="stat-val">n8n</div><div class="stat-lbl">Automation</div></div>
+      <div class="stat-box"><div class="stat-val">Fri</div><div class="stat-lbl">Live Demo</div></div>
+    </div>
+  </div>
+
+  <!-- SPRINT STRIP -->
+  <div class="sprint-strip">
+    <div class="sprint-day">
+      <div class="sd-num">Day 3</div>
+      <div class="sd-dot" style="background:#EFF6FF;color:#2563EB;">D3</div>
+      <div class="sd-label">Customer<br>Form + List</div>
+      <div class="sd-sub">Thursday</div>
+    </div>
+    <div class="sprint-day">
+      <div class="sd-num">Day 4</div>
+      <div class="sd-dot" style="background:#FFFBEB;color:#D97706;">D4</div>
+      <div class="sd-label">Mobile +<br>Jobs Web</div>
+      <div class="sd-sub">Monday</div>
+    </div>
+    <div class="sprint-day">
+      <div class="sd-num">Day 5</div>
+      <div class="sd-dot" style="background:#F5F3FF;color:#7C3AED;">D5</div>
+      <div class="sd-label">Assign +<br>n8n Trigger</div>
+      <div class="sd-sub">Tuesday</div>
+    </div>
+    <div class="sprint-day">
+      <div class="sd-num">Day 6</div>
+      <div class="sd-dot" style="background:#ECFEFF;color:#0891B2;">D6</div>
+      <div class="sd-label">Mobile Jobs<br>+ Status</div>
+      <div class="sd-sub">Wednesday</div>
+    </div>
+    <div class="sprint-day">
+      <div class="sd-num">Day 7</div>
+      <div class="sd-dot" style="background:#ECFDF5;color:#059669;">D7</div>
+      <div class="sd-label">UI Polish<br>+ Demo Prep</div>
+      <div class="sd-sub">Thursday</div>
+    </div>
+    <div class="sprint-day">
+      <div class="sd-num">Day 8</div>
+      <div class="sd-dot" style="background:#FEF2F2;color:#DC2626;">D8</div>
+      <div class="sd-label">Live<br>Demo</div>
+      <div class="sd-sub">Friday</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar-wrap">
+    <div class="progress-label">Sprint Progress</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-count" id="progressCount">0 / 0 tasks</div>
+  </div>
+
+  <!-- DB SCHEMA -->
+  <div class="section" id="schema">
+    <div class="section-header">
+      <div class="section-icon" style="background:#EFF6FF;">🗄️</div>
+      <div class="section-meta">
+        <div class="section-tag">Before You Start</div>
+        <div class="section-title">Database Schema</div>
+      </div>
+      <div class="section-desc">Create these 3 tables before writing any JSON. Every screen references them.</div>
+    </div>
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-head">
+          <div class="schema-emoji" style="background:#EFF6FF;">👤</div>
+          <div><div class="schema-name">customers</div><div class="schema-desc">Core entity</div></div>
+        </div>
+        <div class="schema-fields">
+          <div class="field-row"><span class="field-name">id</span><div class="field-right"><span class="field-type">serial</span><span class="pill pill-pk">PK</span></div></div>
+          <div class="field-row"><span class="field-name">first_name</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">last_name</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">mobile_number</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">email</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">address</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamptz</span></div>
+        </div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-head">
+          <div class="schema-emoji" style="background:#FFFBEB;">🔧</div>
+          <div><div class="schema-name">jobs</div><div class="schema-desc">Linked to customers</div></div>
+        </div>
+        <div class="schema-fields">
+          <div class="field-row"><span class="field-name">id</span><div class="field-right"><span class="field-type">serial</span><span class="pill pill-pk">PK</span></div></div>
+          <div class="field-row"><span class="field-name">customer_id</span><div class="field-right"><span class="field-type">int</span><span class="pill pill-fk">FK</span></div></div>
+          <div class="field-row"><span class="field-name">job_title</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">description</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">status</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">technician_id</span><div class="field-right"><span class="field-type">int</span><span class="pill pill-fk">FK</span></div></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamptz</span></div>
+        </div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-head">
+          <div class="schema-emoji" style="background:#ECFDF5;">👷</div>
+          <div><div class="schema-name">technicians</div><div class="schema-desc">Assigned to jobs</div></div>
+        </div>
+        <div class="schema-fields">
+          <div class="field-row"><span class="field-name">id</span><div class="field-right"><span class="field-type">serial</span><span class="pill pill-pk">PK</span></div></div>
+          <div class="field-row"><span class="field-name">name</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">mobile_number</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">email</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">specialization</span><span class="field-type">text</span></div>
+          <div class="field-row"><span class="field-name">is_available</span><span class="field-type">boolean</span></div>
+          <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamptz</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="section" id="d3">
+    <div class="section-header">
+      <div class="section-icon" style="background:#EFF6FF;">📋</div>
+      <div class="section-meta">
+        <div class="section-tag">Day 3 · Thursday</div>
+        <div class="section-title">Customer Form &amp; List View</div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-num" style="background:#EFF6FF;color:#2563EB;">D3</div>
+        <div class="day-info">
+          <div class="day-name">Thursday — Customers Module</div>
+          <div class="day-focus">Input Forms · INSERT Query · List View · Edit Functionality</div>
+        </div>
+        <div class="day-tags"><span class="tag tag-blue">Web Only</span><span class="tag tag-slate">No UI Polish</span></div>
+      </div>
+      <div class="day-body">
+        <div>
+          <div class="blk-label">Morning Reading — Before Opening the Builder</div>
+          <div class="read-block">
+            <div class="read-label">Required</div>
+            <div class="read-item">fieldproxy-input-forms.md — read fully. Understand what each input_type stores and how values are accessed.</div>
+            <div class="read-item">fieldproxy-actions.md — focus on execute_query, update_data, and open_popup specifically.</div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-label">First Half — Basic Form</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text">Create a <strong>Customer Form</strong> with 3 fields: First Name, Last Name, Mobile Number</div><div class="task-note">All input_type: "text" — no dropdowns yet. Plain form, no styling.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text"><strong>Save button</strong> with <code>execute_query</code> → INSERT into customers table</div><div class="task-note">Use NOW() for created_at. Verify the row appears in the database directly after saving.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text">Create a <strong>Customer List View</strong> — query all customers, display in a basic list widget</div><div class="task-note">Show full name and mobile number. No sorting or search yet.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">After save, use <code>update_data</code> to refresh the list — <strong>not</strong> <code>refresh_data</code></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-label">Second Half — More Fields + Edit</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text">Add <strong>Email</strong> and <strong>Address</strong> fields to the form</div><div class="task-note">Email uses input_type: "email". Address uses input_type: "text" with max_lines: 2.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text">Add <strong>Edit Customer</strong> — clicking a list row opens a popup pre-filled with that customer's data</div><div class="task-note">Pre-fill using arguments passed from the row click. Save triggers an UPDATE query on the correct row.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Update the list view to display all 5 fields</div></div>
+          </div>
+        </div>
+        <div class="deliverable">
+          <div class="del-label">End of Day Deliverable</div>
+          <div class="del-items">
+            <div class="del-item">Customer form saves correctly to the DB (verify in Supabase directly)</div>
+            <div class="del-item">List view shows all saved customers with live refresh after each save</div>
+            <div class="del-item">Edit popup pre-fills data correctly and updates the right row on save</div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-icon">🔒</div>
+          <div><div class="gate-title">Day Gate</div><div class="gate-text">Can explain the difference between <strong>execute_query vs data object queries</strong> and why one is used for mutations. If not, re-read the actions doc before Day 4.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="section" id="d4">
+    <div class="section-header">
+      <div class="section-icon" style="background:#FFFBEB;">📱</div>
+      <div class="section-meta">
+        <div class="section-tag">Day 4 · Monday</div>
+        <div class="section-title">Mobile Views + Jobs Screen (Web)</div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-num" style="background:#FFFBEB;color:#D97706;">D4</div>
+        <div class="day-info">
+          <div class="day-name">Monday — Mobile + Jobs</div>
+          <div class="day-focus">Mobile Customer Screens · Jobs Form · Linked Data · JOIN Queries</div>
+        </div>
+        <div class="day-tags"><span class="tag tag-amber">Web + Mobile</span></div>
+      </div>
+      <div class="day-body">
+        <div>
+          <div class="blk-label">Morning Reading</div>
+          <div class="read-block">
+            <div class="read-label">Required</div>
+            <div class="read-item">fieldproxy-mobile-spacing.md — read fully before building any mobile screen.</div>
+            <div class="read-item">fieldproxy-tables-lists.md — understand list vs table and when to use each.</div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-label">Tasks</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text"><strong>Mobile: Customer List</strong> — card-style list, tap row to navigate to detail view</div><div class="task-note">Mobile spacing rules apply. No horizontal scroll. Stack fields vertically.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Mobile: Customer Detail</strong> — displays all 5 fields, read-only</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text"><strong>Web: Create Job form</strong> — Job Title, Description, Customer (dropdown from DB), Status (Open / In Progress / Closed)</div><div class="task-note">Customer dropdown queries the customers table — show name, store id. Status is a static dropdown.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text"><strong>Web: Jobs List View</strong> — display job title, customer name (via JOIN), and status</div><div class="task-note">SELECT jobs.*, customers.first_name FROM jobs JOIN customers ON jobs.customer_id = customers.id</div></div></div>
+          </div>
+        </div>
+        <div class="deliverable">
+          <div class="del-label">End of Day Deliverable</div>
+          <div class="del-items">
+            <div class="del-item">Mobile customer list and detail screens are functional</div>
+            <div class="del-item">Job form creates a record linked to the correct customer</div>
+            <div class="del-item">Jobs list displays customer name pulled via JOIN query</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="section" id="d5">
+    <div class="section-header">
+      <div class="section-icon" style="background:#F5F3FF;">⚡</div>
+      <div class="section-meta">
+        <div class="section-tag">Day 5 · Tuesday</div>
+        <div class="section-title">Technician Assignment + n8n Automation</div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-num" style="background:#F5F3FF;color:#7C3AED;">D5</div>
+        <div class="day-info">
+          <div class="day-name">Tuesday — Assignment + Automation</div>
+          <div class="day-focus">Technician Dropdown · n8n Webhook · Email Notification on Job Creation</div>
+        </div>
+        <div class="day-tags"><span class="tag tag-purple">n8n Integration</span><span class="tag tag-amber">Gate Day</span></div>
+      </div>
+      <div class="day-body">
+        <div>
+          <div class="blk-label">Morning Reading</div>
+          <div class="read-block">
+            <div class="read-label">Required</div>
+            <div class="read-item">fieldproxy-actions.md — study the api_call action type. This is what triggers the n8n webhook from FieldProxy.</div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-label">FieldProxy Tasks</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Add <strong>Technician dropdown</strong> to the Job form — query technicians table, display name, store id</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text">Add <strong>Assign Technician</strong> button on Job Detail — opens a popup to reassign the technician</div><div class="task-note">UPDATE jobs SET technician_id = ... WHERE id = {{arguments.job_id}}</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Update Jobs list to show the assigned technician name alongside the job status</div></div>
+          </div>
+        </div>
+        <div class="n8n-block">
+          <div class="n8n-title">n8n Workflow — Job Created → Customer Email</div>
+          <div class="n8n-flow">
+            <div class="n8n-node">Webhook Trigger</div>
+            <div class="n8n-arrow">→</div>
+            <div class="n8n-node">Set Node (format data)</div>
+            <div class="n8n-arrow">→</div>
+            <div class="n8n-node">Send Email</div>
+          </div>
+          <div class="blk-label" style="margin-bottom:10px;">Build Steps</div>
+          <div class="n8n-steps">
+            <div class="n8n-step"><div class="n8n-num">01</div><span>In n8n: create a new workflow. Add a <strong>Webhook</strong> node — copy the Test URL to use during development.</span></div>
+            <div class="n8n-step"><div class="n8n-num">02</div><span>Add a <strong>Set</strong> node to extract: job_title, customer name, and status from the incoming payload.</span></div>
+            <div class="n8n-step"><div class="n8n-num">03</div><span>Add a <strong>Send Email</strong> node (Gmail or SMTP). Subject: "New Job Created: {{job_title}}". Body: customer name + job details.</span></div>
+            <div class="n8n-step"><div class="n8n-num">04</div><span>In FieldProxy — on the Create Job button's onclick, add a second action after the INSERT: <code>type: "api_call"</code> with method POST, url = n8n webhook URL, body = job data as JSON.</span></div>
+            <div class="n8n-step"><div class="n8n-num">05</div><span>Test end-to-end: create a job in FieldProxy → check n8n execution log → confirm email is received.</span></div>
+          </div>
+        </div>
+        <div class="warning"><strong>Important:</strong> n8n work only begins once the FieldProxy app (customers + jobs) is fully working from Days 3–4. Do not debug two systems simultaneously.</div>
+        <div class="deliverable">
+          <div class="del-label">End of Day Deliverable</div>
+          <div class="del-items">
+            <div class="del-item">Technician can be assigned to a job from the detail view</div>
+            <div class="del-item">Creating a job fires the n8n webhook and an email is received</div>
+            <div class="del-item">n8n execution log confirms a successful workflow run</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 6 -->
+  <div class="section" id="d6">
+    <div class="section-header">
+      <div class="section-icon" style="background:#ECFEFF;">📲</div>
+      <div class="section-meta">
+        <div class="section-tag">Day 6 · Wednesday</div>
+        <div class="section-title">Mobile Jobs Flow + Status Updates</div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-num" style="background:#ECFEFF;color:#0891B2;">D6</div>
+        <div class="day-info">
+          <div class="day-name">Wednesday — Mobile Jobs</div>
+          <div class="day-focus">Mobile Job List · Job Detail · Status Update · Full Flow Test</div>
+        </div>
+        <div class="day-tags"><span class="tag tag-cyan">Mobile Focus</span></div>
+      </div>
+      <div class="day-body">
+        <div>
+          <div class="blk-label">Tasks</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text"><strong>Mobile: Jobs List</strong> — job title, customer name, colour-coded status badge</div><div class="task-note">Open = Blue, In Progress = Amber, Closed = Green. Use COALESCE on status with a fallback value.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Mobile: Job Detail</strong> — all job fields, assigned technician name, and customer name</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text"><strong>Status Update button</strong> — tap to change status from a dropdown popup, save via UPDATE query, refresh with update_data</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Full flow test</strong> — create customer → create job → assign technician → update status from mobile → verify in web list</div></div>
+          </div>
+        </div>
+        <div class="deliverable">
+          <div class="del-label">End of Day Deliverable — Critical Checkpoint</div>
+          <div class="del-items">
+            <div class="del-item">Complete flow works end-to-end: Customer → Job (with email) → Assign → Mobile status update</div>
+            <div class="del-item">Web jobs list reflects mobile status changes correctly</div>
+            <div class="del-item">No broken screens — all bugs resolved today, not tomorrow</div>
+          </div>
+        </div>
+        <div class="hard-gate">
+          <div class="hard-gate-icon">🔒</div>
+          <div><div class="hard-gate-title">Hard Gate — End of Wednesday</div><div class="hard-gate-text"><strong>The full flow must work by end of Wednesday.</strong> Thursday is reserved for UI refinement and demo preparation only. Functionality bugs carried into Thursday will compromise the Friday demo.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 7 -->
+  <div class="section" id="d7">
+    <div class="section-header">
+      <div class="section-icon" style="background:#ECFDF5;">🎨</div>
+      <div class="section-meta">
+        <div class="section-tag">Day 7 · Thursday</div>
+        <div class="section-title">UI Polish + Demo Preparation</div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-num" style="background:#ECFDF5;color:#059669;">D7</div>
+        <div class="day-info">
+          <div class="day-name">Thursday — Polish + Prep</div>
+          <div class="day-focus">UI Refinement · Sample Reference · Demo Script Rehearsal</div>
+        </div>
+        <div class="day-tags"><span class="tag tag-green">Polish Day</span></div>
+      </div>
+      <div class="day-body">
+        <div>
+          <div class="blk-label">Morning Reading</div>
+          <div class="read-block">
+            <div class="read-label">Required</div>
+            <div class="read-item">fieldproxy-afrin-design.md — apply design patterns selectively. Do not rebuild screens from scratch.</div>
+            <div class="read-item">fieldproxy-nandy-layout.md — fix any grid or overflow issues surfaced during testing.</div>
+          </div>
+        </div>
+        <div>
+          <div class="blk-label">Tasks</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Apply the standard <strong>header bar pattern</strong> across all web views — white header, gray content area, consistent padding</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Add <strong>colour-coded status badges</strong> to the web jobs list, matching the mobile implementation</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Review and fix mobile spacing — verify all screens on a real mobile viewport</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div><div class="task-text">Write a <strong>demo script</strong> — the exact steps to click through during the Friday presentation. Rehearse once.</div><div class="task-note">Pre-seed 2–3 customers, 3 jobs, and 2 technicians so lists are not empty during the demo.</div></div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Dry-run the full demo flow — create customer, create job (confirm email fires), assign technician, update status from mobile, verify on web</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 8 -->
+  <div class="section" id="d8">
+    <div class="section-header">
+      <div class="section-icon" style="background:#FEF2F2;">🎯</div>
+      <div class="section-meta">
+        <div class="section-tag">Day 8 · Friday</div>
+        <div class="section-title">Live Demo</div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-head">
+        <div class="day-num" style="background:#FEF2F2;color:#DC2626;">D8</div>
+        <div class="day-info">
+          <div class="day-name">Friday — End-to-End Demo</div>
+          <div class="day-focus">Full Flow · Web + Mobile · n8n Live · No Slides</div>
+        </div>
+        <div class="day-tags"><span class="tag tag-red">Demo Day</span></div>
+      </div>
+      <div class="day-body">
+        <div>
+          <div class="blk-label">Demo Flow — Present in This Exact Order</div>
+          <div class="task-list">
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Web:</strong> Create a new customer live — fill the form, save, confirm the entry appears in the list</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Web:</strong> Create a job linked to that customer — demonstrate the n8n email firing immediately</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Web:</strong> Assign a technician to the job from the Job Detail view</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Mobile:</strong> Open the jobs list — show the new job appearing with status "Open"</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Mobile:</strong> Open the job detail, tap Update Status → change to "In Progress"</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text"><strong>Web:</strong> Refresh jobs list — show status has updated to "In Progress" in real time</div></div>
+            <div class="task" onclick="toggleTask(this)"><div class="task-cb"></div><div class="task-text">Edit an existing customer — show the edit popup pre-fills correctly and saves the update</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO CHECKLIST -->
+  <div class="section" id="demo">
+    <div class="section-header">
+      <div class="section-icon" style="background:#ECFDF5;">✅</div>
+      <div class="section-meta">
+        <div class="section-tag">Pre-Demo Checklist</div>
+        <div class="section-title">Is it Demo-Ready?</div>
+      </div>
+      <div class="section-desc">Run through this Thursday evening. Any unchecked item must be resolved before Friday morning.</div>
+    </div>
+    <div class="demo-list">
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Customer CRUD is fully functional — create, list, and edit all work on web</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Job creation links correctly to a customer — <code>customer_id</code> is saved in the database</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Creating a job fires the n8n webhook and an email is received in the inbox</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Technician assignment saves correctly — technician name is visible in Job Detail</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Mobile: Customer list and detail screens work with correct spacing on a real device</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Mobile: Jobs list shows colour-coded status badges, job detail displays all relevant fields</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Mobile status update reflects immediately in the web jobs list</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Test data seeded — minimum 3 customers, 3 jobs, and 2 technicians in the database</div><div class="demo-note">Empty lists appear broken during live demos. Seed the data beforehand.</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">Demo flow rehearsed — the full sequence can be walked through without hesitation</div></div></div>
+      <div class="demo-item" onclick="toggleDemo(this)"><div class="demo-cb"></div><div><div class="demo-text">n8n workflow is set to <strong>Production URL</strong> — not the Test URL</div><div class="demo-note">Test webhooks do not persist between sessions. Switch to Production URL before the demo.</div></div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>FieldProxy · FSM Onboarding Sprint · Internal Use</div>
+    <div id="footerProgress">0 / 0 tasks completed</div>
+  </div>
+
+</div>
+
+<script>
+  function toggleTask(el) {
+    el.classList.toggle('done');
+    el.querySelector('.task-cb').textContent = el.classList.contains('done') ? '✓' : '';
+    updateProgress();
+  }
+  function toggleDemo(el) {
+    el.classList.toggle('done');
+    el.querySelector('.demo-cb').textContent = el.classList.contains('done') ? '✓' : '';
+    updateProgress();
+  }
+  function updateProgress() {
+    const all = document.querySelectorAll('.task, .demo-item');
+    const done = document.querySelectorAll('.task.done, .demo-item.done');
+    const pct = all.length ? (done.length / all.length) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = done.length + ' / ' + all.length + ' tasks';
+    document.getElementById('footerProgress').textContent = done.length + ' / ' + all.length + ' tasks completed';
+  }
+  updateProgress();
+</script>
+</body>
+</html>
